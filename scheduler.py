@@ -93,13 +93,12 @@ class Scheduler:
     	for day in self.days:
     	    day.destroy()
         self.days = []
-        row, col = 1, 0
-        for date in self.c.itermonthdates(self.year, self.month):
+        for i, date in enumerate(self.c.itermonthdates(self.year, self.month)):
             tv = IntVar()
             tv.set(date.day)
             self.tvs.append(tv)
             self.days.append(Label(self.frame, bg="white", width=3, textvariable=tv))
-            self.days[-1].grid(row=row, column=col)
+            self.days[-1].grid(row=(i / 7), column=(i % 7))
             if date.month != self.month:
             	self.days[-1].configure(state=DISABLED)
             else:
@@ -107,10 +106,6 @@ class Scheduler:
                     self.selected_day = self.days[-1]
                 self.days[-1].bind("<Button-1>", self.select_day)
                 self.days[-1].bind("<Double-Button-1>", self.new_note)
-            col += 1
-            if col >= 7:
-            	col = 0
-            	row += 1 
             	
     def prev_month(self):
     	if self.month <= 1:
