@@ -37,28 +37,44 @@ class Scheduler:
         menu.add_cascade(label="File", menu=filemenu)
         root.config(menu=menu)
     
-    def new_note(self):
+    def new_note(self, *args, **kwargs):
+        # add date/times
         new_note = Frame(Tk(), padx=10, pady=10)
         new_note.pack()
-        Label(new_note, text="Day").grid(row=0, column=0)
-        spin_box = Spinbox(new_note, width=2)
+        Label(new_note, font="15", text="%s %s, %s" % (calendar.month_name[self.month], self.num_selected_day, self.year)).grid()
+        time = Frame(new_note)
+        Label(time, text="Day").grid(row=0, column=0)
+        spin_box = Spinbox(time, width=2)
         spin_box.config(from_=1, to=calendar.monthrange(self.year, self.month)[1])
         [spin_box.invoke('buttonup') for i in range(self.num_selected_day - 1)]
         spin_box.grid(row=0, column=1)
-        Label(new_note, text="Time").grid(row=1, column=0)
-        spin_box = Spinbox(new_note, width=2)
+        Label(time, text="Time").grid(row=1, column=0)
+        spin_box = Spinbox(time, width=2)
         spin_box.config(from_=1, to=12)
         spin_box.grid(row=1, column=1)
-        Label(new_note, text=":").grid(row=1, column=2)
-        spin_box = Spinbox(new_note, width=2)
+        Label(time, text=":").grid(row=1, column=2)
+        spin_box = Spinbox(time, width=2)
         spin_box.config(values=tuple(str(i).zfill(2) for i in range(60)))
         spin_box.grid(row=1, column=3)
-        am_pm = StringVar(new_note)
+        am_pm = StringVar(time)
         am_pm.set("am")
-        w = OptionMenu(new_note, am_pm, "am", "pm")
+        w = OptionMenu(time, am_pm, "am", "pm")
         w.grid(row=1, column=4)
+        time.grid(sticky="w")
+
+        # add message
+        f = Frame(new_note)
+        f.grid()
+        Label(f, text="Message:").pack(anchor="w")
+        scrollbar = Scrollbar(f)
+        text = Text(f, width=30, height=5, yscrollcommand=scrollbar.set)
+        scrollbar.config(command=text.yview)
+        scrollbar.pack(side='right', fill='y')
+        text.pack(side='left', expand=0, fill='both')
+
+        Button(new_note, text="Save", padx=10, command=self.save_note).grid(pady=10)
             
-    def ok(self, *args, **kwargs):
+    def save_note(self, *args, **kwargs):
     	print kwargs
 
     def select_day(self, arg):
@@ -90,6 +106,7 @@ class Scheduler:
                 if date.day == self.day:
                     self.selected_day = self.days[-1]
                 self.days[-1].bind("<Button-1>", self.select_day)
+                self.days[-1].bind("<Double-Button-1>", self.new_note)
             col += 1
             if col >= 7:
             	col = 0
@@ -101,8 +118,7 @@ class Scheduler:
     		self.month = 12
     	else:
     		self.month -= 1
-    	self.month_lbl.configure(text=calendar.month_name[self.month] + " " + str(self.year))
-    	self.add_days()
+        self.change_month()
     	
     def next_month(self):
     	if self.month >= 12:
@@ -110,6 +126,9 @@ class Scheduler:
     		self.month = 1
     	else:
     		self.month += 1
+        self.change_month()
+
+    def change_month(self):
     	self.month_lbl.configure(text=calendar.month_name[self.month] + " " + str(self.year))
         self.add_days()
         
