@@ -13,29 +13,30 @@ class Schedule:
                      "year": self.date[2] or today.year}
         for arg, val in kwargs.items():
             self.date[arg] = val
-
-    def days_in_month(self):
-        return calendar.monthrange(self.date["year"], self.date["month"])[1]
-
-    def prev_month(self):
-    	if self.date["month"] <= 1:
-    		self.date["year"] -= 1
-    		self.date["month"] = 12
-    	else:
-    		self.date["month"] -= 1
-
-    def next_month(self):
-    	if self.date["month"] >= 12:
-    		self.date["year"] += 1
-    		self.date["month"] = 1
-    	else:
-    		self.date["month"] += 1
-
-    def get_full_lbl(self):
-        return "%s %s, %s" % (calendar.month_name[self.date["month"]], self.date["day"], self.date["year"])
-
-    def get_month_lbl(self):
-        return "%s %s" % (calendar.month_name[self.date["month"]], self.date["year"])
+        self.date = datetime.date(**self.date)
 
     def get_calendar(self):
-        return self.calendar.itermonthdates(self.date["year"], self.date["month"])
+        return self.calendar.itermonthdates(self.date.year, self.date.month)
+
+    def days_in_month(self, year=None, month=None):
+        if year is None or month is None:
+            return calendar.monthrange(self.date.year, self.date.month)[1]
+        else:
+            return calendar.monthrange(year, month)[1]
+
+    def change_day(self, day):
+        self.date = datetime.date(self.date.year, self.date.month, day)
+
+    def prev_month(self):
+    	if self.date.month <= 1:
+            self.date = datetime.date(self.date.year - 1, 12,
+                                      self.days_in_month(year=self.date.year - 1, month=12))
+    	else:
+    		self.date = datetime.date(self.date.year, self.date.month - 1,
+                                      self.days_in_month(year=self.date.year, month=self.date.month - 1))
+
+    def next_month(self):
+    	if self.date.month >= 12:
+            self.date = datetime.date(self.date.year + 1, 1, 1)
+    	else:
+    		self.date = datetime.date(self.date.year, self.date.month + 1, 1)

@@ -1,18 +1,19 @@
 __author__ = 'Tom'
 
+import calendar
 from Tkinter import *
 
 class Appointment:
-    def __init__(self, s):
+    def __init__(self, date):
         # add date/times
         new_note = Frame(Tk(), padx=10, pady=10)
         new_note.pack()
-        Label(new_note, font="15", text=s.get_full_lbl()).grid()
+        Label(new_note, font="15", text=date.strftime("%B %d, %Y")).grid()
         time = Frame(new_note)
         Label(time, text="Day").grid(row=0, column=0)
         spin_box = Spinbox(time, width=2)
-        spin_box.config(from_=1, to=s.days_in_month())
-        [spin_box.invoke('buttonup') for i in range(s.date["day"] - 1)]
+        spin_box.config(from_=1, to=calendar.monthrange(date.year, date.month)[1])
+        [spin_box.invoke('buttonup') for i in range(date.day - 1)]
         spin_box.grid(row=0, column=1)
         Label(time, text="Time").grid(row=1, column=0)
         spin_box = Spinbox(time, width=2)

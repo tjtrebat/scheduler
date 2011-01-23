@@ -17,7 +17,7 @@ class Scheduler:
         self.add_menu_bar() # add menu bar
 
     def new_note(self, *args, **kwargs):
-        Appointment(self.schedule)
+        Appointment(self.schedule.date)
 
     def add_menu_bar(self):
         menu = Menu(self.root)
@@ -30,7 +30,7 @@ class Scheduler:
         frame = Frame(self.root, padx=15, pady=15)
         frame.pack()
         Button(frame, text="<", command=lambda x = False:self.change_month(x)).grid(row=0, column=0)
-        self.month_lbl = Label(frame, padx=15, text=self.schedule.get_month_lbl())
+        self.month_lbl = Label(frame, padx=15, text=self.schedule.date.strftime("%B %Y"))
         self.month_lbl.grid(row=0, column=1)
         Button(frame, text=">", command=lambda x = True:self.change_month(x)).grid(row=0, column=2)
 
@@ -39,10 +39,6 @@ class Scheduler:
     	for day in self.days:
     	    day.destroy()
         self.tvs, self.days = [], []
-        num_days = self.schedule.days_in_month() # get number of days in month
-        # set day to last day in month if greater than number of days in month
-        if self.schedule.date["day"] > num_days:
-            self.schedule.date["day"] = num_days
          # add calendar
         for i, date in enumerate(self.schedule.get_calendar()):
             tv = IntVar()
@@ -50,10 +46,10 @@ class Scheduler:
             self.tvs.append(tv)
             self.days.append(Label(self.frame, bg="white", width=3, textvariable=tv))
             self.days[-1].grid(row=(i / 7), column=(i % 7))
-            if date.month != self.schedule.date["month"]:
+            if date.month != self.schedule.date.month:
             	self.days[-1].configure(state=DISABLED)
             else:
-                if date.day == self.schedule.date["day"]:
+                if date.day == self.schedule.date.day:
                     self.selected_day = self.days[-1]
                 self.days[-1].bind("<Button-1>", self.select_day)
                 self.days[-1].bind("<Double-Button-1>", self.new_note)
@@ -66,7 +62,7 @@ class Scheduler:
         self.selected_day.config(foreground="WHITE", background="BLUE")
         for i, day in enumerate(self.days):
             if self.selected_day == day:
-                self.schedule.date["day"] = self.tvs[i].get()
+                self.schedule.change_day(self.tvs[i].get())
 
     def add_appointments(self):
         frame = Frame(self.root)
@@ -86,7 +82,7 @@ class Scheduler:
         else:
             self.schedule.prev_month()
         self.add_days()
-        self.month_lbl.configure(text=self.schedule.get_month_lbl())
+        self.month_lbl.configure(text=self.schedule.date.strftime("%B %Y"))
 
     def open_note(self, arg):
     	print self.appointment_list.get(arg.widget.curselection()[0])
