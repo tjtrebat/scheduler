@@ -13,7 +13,7 @@ class Schedule:
                      "year": self.date[2] or today.year}
         for arg, val in kwargs.items():
             self.date[arg] = val
-        self.date = datetime.date(**self.date)
+        self.date = datetime.datetime(**self.date)
 
     def get_calendar(self):
         return self.calendar.itermonthdates(self.date.year, self.date.month)
@@ -25,18 +25,18 @@ class Schedule:
             return calendar.monthrange(year, month)[1]
 
     def change_day(self, day):
-        self.date = datetime.date(self.date.year, self.date.month, day)
+        self.date = datetime.datetime(self.date.year, self.date.month, day)
 
     def prev_month(self):
     	if self.date.month <= 1:
-            self.date = datetime.date(self.date.year - 1, 12,
+            self.date = datetime.datetime(self.date.year - 1, 12,
                                       self.days_in_month(year=self.date.year - 1, month=12))
     	else:
-    		self.date = datetime.date(self.date.year, self.date.month - 1,
+    		self.date = datetime.datetime(self.date.year, self.date.month - 1,
                                       self.days_in_month(year=self.date.year, month=self.date.month - 1))
 
     def next_month(self):
     	if self.date.month >= 12:
-            self.date = datetime.date(self.date.year + 1, 1, 1)
+            self.date = datetime.datetime(self.date.year + 1, 1, 1)
     	else:
-    		self.date = datetime.date(self.date.year, self.date.month + 1, 1)
+    		self.date = datetime.datetime(self.date.year, self.date.month + 1, 1)

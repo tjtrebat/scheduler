@@ -39,8 +39,7 @@ class Scheduler:
     	for day in self.days:
     	    day.destroy()
         self.tvs, self.days = [], []
-         # add calendar
-        for i, date in enumerate(self.schedule.get_calendar()):
+        for i, date in enumerate(self.schedule.get_calendar()): # add calendar
             tv = IntVar()
             tv.set(date.day)
             self.tvs.append(tv)
@@ -51,9 +50,9 @@ class Scheduler:
             else:
                 if date.day == self.schedule.date.day:
                     self.selected_day = self.days[-1]
+                    self.selected_day.config(foreground="WHITE", background="BLUE")
                 self.days[-1].bind("<Button-1>", self.select_day)
                 self.days[-1].bind("<Double-Button-1>", self.new_note)
-        self.selected_day.config(foreground="WHITE", background="BLUE")
 
     def select_day(self, arg):
         if self.selected_day is not None:
