@@ -1,25 +1,32 @@
 __author__ = 'Tom'
 
 import calendar
+import datetime
 from Tkinter import *
+import cPickle as pickle
+import uuid
+import glob
 
 class Appointment:
-    def __init__(self, date):
-        self.frame = Frame(Tk(), padx=10, pady=10)
+    def __init__(self, date, message="", scheduler=None, id=""):
+        self.root = Tk()
+        self.frame = Frame(self.root, padx=10, pady=10)
         self.frame.pack()
+        self.scheduler = scheduler
+        self.id = id or uuid.uuid4()
         self.date = date
         self.add_date() # add date
         self.add_time() # add time
-        self.add_message() # add message box
+        self.add_message(message) # add message box
 
     def add_date(self):
         date = Frame(self.frame)
         Label(date, text="Date").grid(row=0, column=0)
         self.days = self.get_spin_box(date, self.date.day, width=2, from_=1,
-                          to=calendar.monthrange(self.date.year, self.date.month)[1])
+                                      to=calendar.monthrange(self.date.year, self.date.month)[1])
         self.days.grid(row=0, column=1)
         Label(date, text="/").grid(row=0, column=2)
-        self.months = self.get_spin_box(date, self.date.day, width=2, from_=1, to=12)
+        self.months = self.get_spin_box(date, self.date.month, width=2, from_=1, to=12)
         self.months.config(command=self.change_days)
         self.months.grid(row=0, column=3)
         Label(date, text="/").grid(row=0, column=4)
@@ -31,39 +38,48 @@ class Appointment:
     def add_time(self):
         time = Frame(self.frame)
         Label(time, text="Time").grid(row=0, column=0)
-        self.hours = self.get_spin_box(time, self.date.hour % 12, width=2, from_=1, to=12)
+        self.hours = self.get_spin_box(time, self.date.hour, width=2, from_=1, to=23)
         self.hours.grid(row=0, column=1) # add hours
         Label(time, text=":").grid(row=0, column=2)
-        self.minutes = self.get_spin_box(time, self.date.minute, width=2, values=tuple(str(i).zfill(2) for i in range(60)))
+        self.minutes = self.get_spin_box(time, self.date.minute, width=2,
+                                         values=tuple(str(i).zfill(2) for i in range(60)))
         self.minutes.grid(row=0, column=3) # add minutes
-        am_pm = StringVar(time)
-        if self.date.hour < 12:
-            am_pm.set("am")
-        else:
-            am_pm.set("pm")
-        w = OptionMenu(time, am_pm, "am", "pm") # add am/pm
-        w.grid(row=0, column=4)
         time.grid(sticky="w")
 
-    def get_spin_box(self, frame, selected, **kwargs):
-        spin_box = Spinbox(frame)
-        spin_box.config(**kwargs)
-        [spin_box.invoke('buttonup') for i in range(selected - 1)]
-        return spin_box
-
-    def add_message(self):
+    def add_message(self, message):
         f = Frame(self.frame)
         f.grid()
         Label(f, text="Message:").pack(anchor="w")
         scroll_bar = Scrollbar(f)
-        text = Text(f, width=30, height=5, yscrollcommand=scroll_bar.set)
-        scroll_bar.config(command=text.yview)
+        self.message = Text(f, width=30, height=5, yscrollcommand=scroll_bar.set)
+        self.message.insert(1.0, message)
+        scroll_bar.config(command=self.message.yview)
         scroll_bar.pack(side='right', fill='y')
-        text.pack(side='left', expand=0, fill='both')
+        self.message.pack(side='left', expand=0, fill='both')
         Button(self.frame, text="Save", padx=10, command=self.save_note).grid(pady=10)
+
+    def get_spin_box(self, frame, index, **kwargs):
+        spin_box = Spinbox(frame)
+        spin_box.config(**kwargs)
+        [spin_box.invoke('buttonup') for i in range(index - 1)] 
+        return spin_box
 
     def change_days(self):
         self.days.config(from_=1, to=calendar.monthrange(int(self.years.get()), int(self.months.get()))[1])
 
     def save_note(self, *args, **kwargs):
-    	print kwargs
+        self.date = datetime.datetime(int(self.years.get()), int(self.months.get()), int(self.days.get()),
+                                      hour=int(self.hours.get()), minute=int(self.minutes.get()))
+        pickle.dump({"id": self.id, "date": self.date, "message": self.message.get(1.0, END)},
+                    open("appointments/%s.p" % self.id, "wb"))
+        if self.scheduler is not None:
+            self.scheduler.change_appointments()
+        self.root.destroy()
+
+def get_appointments(month):
+    appointments = []
+    for file_name in glob.glob("appointments/*"):
+        appointment = pickle.load(open(file_name))
+        if appointment["date"].month == month:
+            appointments.append(appointment)
+    return sorted(appointments, key=lambda x: x["date"])
