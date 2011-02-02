@@ -14,6 +14,11 @@ class Scheduler:
         self.frame = Frame(self.root)
         self.frame.pack()
         self.add_days() # adds calendar to frame
+        # sets the selected day to today
+        for i, date in enumerate(self.schedule.get_calendar()):
+            if date.month == self.schedule.date.month and date.day == self.schedule.date.day:
+                self.selected_day = self.days[i]
+                self.selected_day.config(foreground="WHITE", background="BLUE")
         self.add_appointments() # add appointment frame
 
     def add_menu_bar(self):
@@ -51,9 +56,6 @@ class Scheduler:
             if date.month != self.schedule.date.month:
             	self.days[-1].configure(state=DISABLED)
             else:
-                if date.day == self.schedule.date.day:
-                    self.selected_day = self.days[-1]
-                    self.selected_day.config(foreground="WHITE", background="BLUE")
                 self.days[-1].bind("<Button-1>", self.select_day)
                 self.days[-1].bind("<Double-Button-1>", self.new_note)
 
@@ -87,7 +89,7 @@ class Scheduler:
         self.add_days()
         self.month_lbl.configure(text=self.schedule.date.strftime("%B %Y"))
         self.change_appointments()
-
+        
     def change_appointments(self):
         self.appointment_list.delete(0, END)
         self.appointments = get_appointments(self.schedule.date.month)
