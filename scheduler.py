@@ -4,7 +4,9 @@ from schedule import *
 from appointment import *
 
 class Scheduler:
+    """ A simple Tk schedule/appointment class """
     def __init__(self, root, schedule):
+        """ Initialize new Schedule GUI instance """
         self.root = root
         self.schedule = schedule
         self.days, self.tvs = [], []
@@ -22,6 +24,7 @@ class Scheduler:
         self.add_appointments() # add appointment frame
 
     def add_menu_bar(self):
+        """ Adds file menu for new and open note commands """
         menu = Menu(self.root)
         file_menu = Menu(menu, tearoff=0)
         file_menu.add_command(label="New", command=self.new_note)
@@ -30,6 +33,8 @@ class Scheduler:
         self.root.config(menu=menu)
 
     def add_header(self):
+        """ Add header displaying the month and buttons for
+         navigating between months """
         frame = Frame(self.root, padx=15, pady=15)
         frame.pack()
         Button(frame, text="<", command=lambda x = False:self.change_month(x)).grid(row=0, column=0)
@@ -43,6 +48,7 @@ class Scheduler:
             Label(frame, text=day, width=3).grid(row=0, column=i)
 
     def add_days(self):
+        """ Adds the days in the Schedule instance month """
         self.selected_day = None
     	for day in self.days:
     	    day.destroy()
@@ -60,6 +66,8 @@ class Scheduler:
                 self.days[-1].bind("<Double-Button-1>", self.new_note)
 
     def add_appointments(self):
+        """ Add appointment frame with appointments from
+        this month. """
         frame = Frame(self.root)
         frame.pack(anchor=W)
         appointment_lbl = Label(frame, text="Appointments", pady=15)
@@ -73,6 +81,7 @@ class Scheduler:
         self.change_appointments()
 
     def select_day(self, arg):
+        """ Event handler for changing the Schedule day. """
         if self.selected_day is not None:
             self.selected_day.config(foreground="BLACK", background="WHITE")
         self.selected_day = arg.widget
@@ -82,27 +91,29 @@ class Scheduler:
                 self.schedule.change_day(self.tvs[i].get())
 
     def change_month(self, is_next):
-        if is_next:
-            self.schedule.next_month()
-        else:
-            self.schedule.prev_month()
+        """ Handler for left/right arrow buttons """
+        self.schedule.next_month() if is_next else self.schedule.prev_month()
         self.add_days()
         self.month_lbl.configure(text=self.schedule.date.strftime("%B %Y"))
         self.change_appointments()
         
     def change_appointments(self):
+        """ Changes the appointments when the month is changed """
         self.appointment_list.delete(0, END)
         self.appointments = get_appointments(self.schedule.date.month)
         for appointment in self.appointments:
             self.appointment_list.insert(END, appointment["date"].strftime("%d/%m/%Y %H:%M"))
 
     def open_note(self, arg=None):
+        """ Opens the selected appointment """
         appointment = self.appointments[int(self.appointment_list.curselection()[0])]
         Appointment(appointment["date"], appointment["message"], scheduler=self, id=appointment["id"])
 
     def new_note(self, *args, **kwargs):
+        """ Create new Appointment for the Schedule date """
         Appointment(self.schedule.date, scheduler=self)
 
-root = Tk()
-scheduler = Scheduler(root, Schedule())
-root.mainloop()
+if __name__ == "__main__":
+    root = Tk()
+    scheduler = Scheduler(root, Schedule())
+    root.mainloop()

@@ -26,11 +26,13 @@ class Appointment:
                                       to=calendar.monthrange(self.date.year, self.date.month)[1])
         self.days.grid(row=0, column=1)
         Label(date, text="/").grid(row=0, column=2)
-        self.months = self.get_spin_box(date, self.date.month, width=2, from_=1, to=12)
+        self.months = self.get_spin_box(date, self.date.month, width=2,
+                                        from_=1, to=12)
         self.months.config(command=self.change_days)
         self.months.grid(row=0, column=3)
         Label(date, text="/").grid(row=0, column=4)
-        self.years = self.get_spin_box(date, self.date.year, width=4, from_=1, to=9999)
+        self.years = self.get_spin_box(date, self.date.year, width=4, from_=1,
+                                       to=9999)
         self.years.config(command=self.change_days)
         self.years.grid(row=0, column=5)
         date.grid(sticky="w")
@@ -59,8 +61,7 @@ class Appointment:
         Button(self.frame, text="Save", padx=10, command=self.save_note).grid(pady=10)
 
     def get_spin_box(self, frame, index, **kwargs):
-        spin_box = Spinbox(frame)
-        spin_box.config(**kwargs)
+        spin_box = Spinbox(frame, **kwargs)
         [spin_box.invoke('buttonup') for i in range(index - 1)] 
         return spin_box
 
