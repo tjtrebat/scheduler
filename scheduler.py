@@ -4,7 +4,7 @@ from schedule import *
 from appointment import *
 
 class Scheduler:
-    """ A simple Tk schedule/appointment class """
+    """ A simple Tk schedule/appointment class. """
     def __init__(self, root, schedule):
         """ Initialize new Schedule GUI instance """
         self.root = root
