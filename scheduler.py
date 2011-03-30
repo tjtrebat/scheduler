@@ -100,7 +100,7 @@ class Scheduler:
     def change_appointments(self):
         """ Changes the appointments when the month is changed """
         self.appointment_list.delete(0, END)
-        self.appointments = get_appointments(self.schedule.date.month)
+        self.appointments = Appointment.get_appointments(self.schedule.date.month)
         for appointment in self.appointments:
             self.appointment_list.insert(END, appointment["date"].strftime("%d/%m/%Y %H:%M"))
 

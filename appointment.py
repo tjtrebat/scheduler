@@ -77,10 +77,11 @@ class Appointment:
             self.scheduler.change_appointments()
         self.root.destroy()
 
-def get_appointments(month):
-    appointments = []
-    for file_name in glob.glob("appointments/*"):
-        appointment = pickle.load(open(file_name))
-        if appointment["date"].month == month:
-            appointments.append(appointment)
-    return sorted(appointments, key=lambda x: x["date"])
+    @classmethod
+    def get_appointments(self, month):
+        appointments = []
+        for file_name in glob.glob("appointments/*"):
+            appointment = pickle.load(open(file_name))
+            if appointment["date"].month == month:
+                appointments.append(appointment)
+        return sorted(appointments, key=lambda x: x["date"])
